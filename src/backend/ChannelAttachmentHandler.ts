@@ -12,6 +12,8 @@ import { FileJournalEntry } from "./FileJournalEntry";
 import { JournalFile } from "./JournalFile";
 import { JOURNAL_ENTRY_TYPE } from "./BaseJournalEntry";
 
+import config from "../../config";
+
 //taken from fixed-size-stream-splitter by substack
 class SizeStream extends stream.Writable {
     private pending: number;
@@ -74,7 +76,7 @@ class SizeStream extends stream.Writable {
 
 
 export default class Journal implements IJournal {
-    private aesKey = process.env.AES_KEY ? crypto.createHash('md5').update(process.env.AES_KEY,"utf8").digest("hex").slice(0, 32) : null;
+    private aesKey = config.AES_KEY ? crypto.createHash('md5').update(config.AES_KEY,"utf8").digest("hex").slice(0, 32) : null;
 
     encrypt(text:string) : string {
         let iv = crypto.randomBytes(16);

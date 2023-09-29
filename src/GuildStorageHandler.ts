@@ -4,6 +4,7 @@ import FTPFrontend from "./frontends/FTPFrontend";
 //import FuseFrontend from "./frontends/FuseFrontend";
 import HTTPFrontend from "./frontends/HTTPFrontend";
 import IFrontend from "./frontends/IFrontend";
+import config from "../config";
 
 export default class StorageHandler{
    
@@ -24,20 +25,16 @@ export default class StorageHandler{
     }
 
     private loadFrontends(){
-        if(process.env.HTTP_PORT != null){
-            let httpPort = process.env.HTTP_PORT;
+        if(config.HTTP_PORT != null){
+            let httpPort = config.HTTP_PORT;
             this.addFrontend(new HTTPFrontend(parseInt(httpPort)));
         }
         
-        if(process.env.LISTEN_IP != null && (process.env.FTP_PORT != null || process.env.PORT != null) && process.env.EXTERNAL_IP != null){
-            let port = process.env.FTP_PORT || process.env.PORT;
-            let listenIP = process.env.LISTEN_IP;
-            let externalIP = process.env.EXTERNAL_IP;
+        if(config.LISTEN_IP != null && (config.FTP_PORT != null) && config.EXTERNAL_IP != null){
+            let port = config.FTP_PORT;
+            let listenIP = config.LISTEN_IP;
+            let externalIP = config.EXTERNAL_IP;
             this.addFrontend(new FTPFrontend(listenIP ,parseInt(port), externalIP));
-        }
-
-        if(process.env.MOUNT_PATH){
-            //this.addFrontend(new FuseFrontend(process.env.MOUNT_PATH));
         }
 
         this.startFrontends();

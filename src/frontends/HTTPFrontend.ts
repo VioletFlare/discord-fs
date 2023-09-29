@@ -25,14 +25,18 @@ export default class HTTPFrontend implements IFrontend{
     }
 
     private upload(root: string, fileName: string, file: stream.Stream, res: any){
-        this.journal.createFile(path.join(root, fileName)).then((stream: stream.Writable) => {
-            stream.on('close', () => {
-                setTimeout(() => {
-                    res.redirect("/");
-                },1000)
+        if (fileName) {
+            this.journal.createFile(path.join(root, fileName)).then((stream: stream.Writable) => {
+                stream.on('close', () => {
+                    setTimeout(() => {
+                        res.redirect("/");
+                    },1000)
+                });
+                file.pipe(stream);
             });
-            file.pipe(stream);
-        });
+        } else {
+            res.redirect("/");
+        }
     }
 
     private registerRoutes(){
@@ -71,11 +75,11 @@ export default class HTTPFrontend implements IFrontend{
                     template = template.replace("{NAME}",directory.name);
         
                     res.send(template);
-                }else return res.send(404);
+                }else return res.sendStatus(404);
             }
             else{
                 let stream = await this.journal.download(file);
-                if(stream == null) res.send(500);
+                if(stream == null) res.sendStatus(500);
                 res.header("Content-Type", mime.lookup(filePath));
                 stream.pipe(res);
                 stream.on("close",() =>{

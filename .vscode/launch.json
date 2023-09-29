@@ -13,16 +13,6 @@
         "outFiles": [
             "${workspaceFolder}/**/*.js"
         ],
-        "env": {
-            "CHANNEL": "1039232047245443202",
-            "GUILD": "616275803445133351",
-            "LISTEN_IP": "127.0.0.1",
-            "EXTERNAL_IP": "127.0.0.1",
-            "HTTP_PORT" : "1338",
-            "AES_KEY":"BAM~NOBODY~GUESSES_this_:D",
-            "FTP_PORT": "1337",
-            "TOKEN": "th3243424234sadf342fis.aint.my.real.token3214434"
-        }
     }]
 }
 

@@ -1,5 +1,6 @@
 import * as Discord from "discord.js";
 import GuildStorageHandler from "./GuildStorageHandler";
+import config from "../config";
 
 export default class Bot{
     private bot: Discord.Client
@@ -18,8 +19,8 @@ export default class Bot{
 
     private async load(){
         console.log("Connected to Discord...");
-        let guildID = process.env.GUILD;
-        let channelID = process.env.CHANNEL;
+        let guildID = config.GUILD;
+        let channelID = config.CHANNEL;
 
         let guild = this.bot.guilds.resolve(guildID);
         if(guild == null) throw Error("Guild " + guildID + " not found");
