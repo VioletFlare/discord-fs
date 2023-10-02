@@ -14,8 +14,7 @@ export default class StorageHandler{
     constructor(
         private guild: Discord.Guild, 
         private channel: Discord.TextChannel
-        ){
-       
+    ){   
         this.journal = new Journal(channel);
     }
 
