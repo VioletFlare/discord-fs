@@ -73,8 +73,6 @@ class SizeStream extends stream.Writable {
       }
 }
 
-
-
 export default class Journal implements IJournal {
     private aesKey = config.AES_KEY ? crypto.createHash('md5').update(config.AES_KEY,"utf8").digest("hex").slice(0, 32) : null;
 

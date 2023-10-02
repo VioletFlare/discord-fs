@@ -1,5 +1,5 @@
 import * as Discord from "discord.js";
-import ChannelAttachmentHandler from "./backend/ChannelAttachmentHandler";
+import Journal from "./backend/Journal";
 import FTPFrontend from "./frontends/FTPFrontend";
 //import FuseFrontend from "./frontends/FuseFrontend";
 import HTTPFrontend from "./frontends/HTTPFrontend";
@@ -8,7 +8,7 @@ import config from "../config";
 
 export default class StorageHandler{
    
-    private journal: ChannelAttachmentHandler
+    private journal: Journal
     private frontends : IFrontend[] = [];
 
     constructor(
@@ -16,7 +16,7 @@ export default class StorageHandler{
         private channel: Discord.TextChannel
         ){
        
-        this.journal = new ChannelAttachmentHandler(channel);
+        this.journal = new Journal(channel);
     }
 
     public async load(){
