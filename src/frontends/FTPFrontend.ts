@@ -83,18 +83,18 @@ export default class FTPFrontend implements IFrontend{
         cb(null,stat);
     }
 
-    public async readdir(pathName:string ,cb :(err?: string,files?: Array<string>) => void){
+    public async readdir(pathName:string, cb: (err?: string,files?: Array<string>) => void){
         let files = await this.journal.getFiles(pathName);
         let directories = await this.journal.getChildDirectories(pathName);
         cb(null,files.concat(directories));
     }
 
-    public async mkdir(pathName:string ,cb :(err?: string) => void){
+    public async mkdir(pathName:string, cb: (err?: string) => void){
         await this.journal.createDirectory(pathName);
         cb();
     }
 
-    public async unlink(pathName:string ,cb :(err?: string) => void){
+    public async unlink(pathName:string, cb: (err?: string) => void){
         let file = await this.journal.getFile(pathName);
         if(file == null) {
             return cb("File not found");
@@ -103,25 +103,25 @@ export default class FTPFrontend implements IFrontend{
             await this.journal.deleteFile(pathName).then(() => cb()).catch((err) => cb(err));
     }
 
-    public async rmdir(pathName:string ,cb :(err?: string) => void){
+    public async rmdir(pathName:string, cb: (err?: string) => void){
         let directory = this.journal.getDirectory(pathName);
         if(directory == null) return cb("Directory not found");
         else
             await this.journal.deleteDirectory(pathName).then(() => cb());
     }
 
-    public async upload(pathName:string , offset: any, cb :(err?: string,stream?: Stream ) => void){
+    public async upload(pathName:string, offset: any, cb: (err?: string,stream?: Stream ) => void){
         await this.journal.createFile(pathName).then((stream)=>{
-            cb(null,stream);
+            cb(null, stream);
         });
     } 
     
-    public async download(pathName:string ,offset: any,cb :(err?: string,stream?: Stream ) => void){
+    public async download(pathName:string, offset: any, cb :(err?: string,stream?: Stream ) => void){
         let file = await this.journal.getFile(pathName);
         if(file != null){
             try{
                 let stream: Stream = await this.journal.download(file);
-                cb(null,stream);
+                cb(null, stream);
             }catch(err){
                 cb(err);
             }
