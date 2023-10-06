@@ -278,7 +278,16 @@ export default class Journal implements IJournal {
         let directoryName = that.normalizePath(path.dirname(filePath));
         let fileName = path.basename(filePath);
         let directory = that.directories.find(d => d.name == directoryName);
+
         if (directory == null) directory = await that.createDirectory(directoryName);
+        
+        const thumbsDirectoryName = this.normalizePath(path.join(directoryName, '.thumbs'));
+        const thumbsDirectory = that.directories.find(d => d.name == thumbsDirectoryName);
+
+        const shouldCreateThumbsDir = thumbsDirectory == null && path.basename(directoryName) !== '.thumbs';
+
+        if (shouldCreateThumbsDir) await that.createDirectory(thumbsDirectoryName);
+
         if(that.files.find(f => f.directory == directory.id && f.name == fileName)){
             await that.deleteFile(filePath);
         }
@@ -309,29 +318,39 @@ export default class Journal implements IJournal {
         return entry;
     }
 
-    public async createDirectory(directoryName: string): Promise<DirectoryJournalEntry> {
-        let that = this;
-        
-        directoryName = that.normalizePath(directoryName);
-        let existingDirectory = that.directories.find(d => d.name == directoryName);
-        if(existingDirectory != null){
-            console.log("Not recreating directory because it already exists " + directoryName);
-            return existingDirectory;
-        }
+    public createDirectoryOnDiscord(directoryName: string) {
         console.log("Creating directory " + directoryName);
         let entry = new DirectoryJournalEntry();
         entry.id = uuidv4();
         entry.name = directoryName;
         let text = JSON.stringify(entry);
-        if(that.aesKey != null){
-            text = that.encrypt(text);
+
+        if (this.aesKey != null) {
+            text = this.encrypt(text);
         }
-        that.channel.send(text).then((message: Discord.Message) => {
+
+        this.channel.send(text).then((message: Discord.Message) => {
             entry.mid = message.id;
-            that.directories.push(entry);
+            this.directories.push(entry);
             return entry;
         })
+    }
+
+    public async createDirectory(directoryName: string): Promise<DirectoryJournalEntry> {
         
+        directoryName = this.normalizePath(directoryName);
+        let existingDirectory = this.directories.find(d => d.name == directoryName);
+
+        if (existingDirectory != null) {
+            console.log("Not recreating directory because it already exists " + directoryName);
+            return existingDirectory;
+        }
+    
+        this.createDirectoryOnDiscord(directoryName);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
+        
+        const thumbsDirectoryName = this.normalizePath(path.join(directoryName, '.thumbs'))
+
+        this.createDirectoryOnDiscord(thumbsDirectoryName);
     }
 
     public async deleteDirectory(directoryName: string) {
@@ -339,8 +358,14 @@ export default class Journal implements IJournal {
         directoryName = this.normalizePath(directoryName);
         let directory = this.directories.find(d => d.name == directoryName);
         this.directories = this.directories.filter(d => d.id != directory.id);
-        let journalEntry = await this.channel.messages.fetch(directory.mid);
-        if (journalEntry != null) journalEntry.delete();
+        
+        try {
+            let journalEntry = await this.channel.messages.fetch(directory.mid);
+            if (journalEntry != null) journalEntry.delete();
+        } catch (e) {
+            console.error(e);
+        }
+
     }
 }
 
