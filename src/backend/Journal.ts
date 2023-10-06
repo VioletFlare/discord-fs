@@ -261,13 +261,15 @@ export default class Journal implements IJournal {
     public async createFile(filePath: string): Promise<stream.Writable> {
         let j = 0;
         let that = this;
+
         return new SizeStream(25e+6, function (stream) {
-            if(that.aesKey != null){
+            if (that.aesKey != null) {
                 let iv = crypto.randomBytes(16);
-                that.createFileImpl(filePath + (j == 0 ? "" : ".part"+ j),stream.pipe(that.getCipher(iv)),iv);
-            }else{
-                that.createFileImpl(filePath + (j == 0 ? "" : ".part"+ j),stream);
+                that.createFileImpl(filePath + (j == 0 ? "" : ".part"+ j), stream.pipe(that.getCipher(iv)), iv);
+            } else {
+                that.createFileImpl(filePath + (j == 0 ? "" : ".part"+ j), stream);
             }
+
             j++;
         });
     };
@@ -288,23 +290,29 @@ export default class Journal implements IJournal {
 
         if (shouldCreateThumbsDir) await that.createDirectory(thumbsDirectoryName);
 
-        if(that.files.find(f => f.directory == directory.id && f.name == fileName)){
+        if (that.files.find(f => f.directory == directory.id && f.name == fileName)) {
             await that.deleteFile(filePath);
         }
+        
         let entry: FileJournalEntry = new FileJournalEntry();
-        if(iv != null)
+        
+        if (iv != null) {
             entry.iv = iv.toString("hex");
+        }
+
         entry.directory = directory.id;
         entry.name = fileName;
 
         let text = JSON.stringify(entry);
         let attachmentName = fileName;
 
-        if(that.aesKey != null){
-                text = that.encrypt(text);
+        if (that.aesKey != null) {
+            text = that.encrypt(text);
             attachmentName = that.encrypt(attachmentName);
         }
-        let a = new Discord.AttachmentBuilder(content,{name: attachmentName});
+
+        let a = new Discord.AttachmentBuilder(content, {name: attachmentName});
+
         await that.channel.send({
             content: text,
             files: [a]
@@ -315,6 +323,7 @@ export default class Journal implements IJournal {
             entry.mid = message.id;
             that.files.push(entry);
         })
+
         return entry;
     }
 
