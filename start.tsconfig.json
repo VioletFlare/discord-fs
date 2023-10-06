@@ -4,7 +4,12 @@
         "module": "commonjs",
         "sourceMap": true,
         "alwaysStrict": true,
-        "noImplicitAny": false
+        "noImplicitAny": true,
+        "skipLibCheck": true
     },
-    "compileOnSave": true
+    "compileOnSave": true,
+    "typeRoots": [
+        "./types",
+        "./node_modules/@types/"
+    ]
 }
