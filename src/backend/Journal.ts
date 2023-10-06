@@ -6,6 +6,9 @@ import * as path from "path";
 import * as stream from "stream";
 import { v4 as uuidv4 } from 'uuid';
 
+// tslint:disable-next-line
+const StreamSkip = require('stream-skip');
+
 import IJournal from "./IJournal";
 import { DirectoryJournalEntry } from "./DirectoryJournalEntry";
 import { FileJournalEntry } from "./FileJournalEntry";
@@ -163,7 +166,7 @@ export default class Journal implements IJournal {
     }
 
     
-    public async download(file: JournalFile) : Promise<stream.Readable> {
+    public async download(file: JournalFile, offset: number) : Promise<stream.Readable> {
         let that = this;
         let files = [file.journalEntry].concat(file.parts);
         let streams = [];
@@ -178,6 +181,18 @@ export default class Journal implements IJournal {
                 streams.push(res.pipe(that.getDecipher(Buffer.from(f.iv,"hex"))));
             }
         }
+
+        if (offset) {
+            const offsetRemainder = offset % 25e6;
+            const streamsOffset = (offset - offsetRemainder) / 25e6;
+            streams = streams.slice(streamsOffset);
+
+            if (offsetRemainder) {
+                var sstream = new StreamSkip({ skip: offsetRemainder })
+                streams[0] = streams[0].pipe(sstream);
+            }
+        }
+
         return new MultiStream(streams);
     }
     

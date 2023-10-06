@@ -7,5 +7,9 @@
         "noImplicitAny": true,
         "skipLibCheck": true
     },
-    "compileOnSave": true
+    "compileOnSave": true,
+    "typeRoots": [
+        "./types",
+        "./node_modules/@types/"
+    ]
 }

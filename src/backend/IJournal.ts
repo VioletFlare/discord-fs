@@ -5,7 +5,7 @@ import { JournalFile } from "./JournalFile";
 export default interface IJournal{
     getDirectory(directoryName: string) : Promise<DirectoryJournalEntry>
     getFile(pathName: string): Promise<JournalFile>
-    download(file: JournalFile) : Promise<stream.Readable>
+    download(file: JournalFile, offset?: number) : Promise<stream.Readable>
     getFile(filePath: string) : Promise<JournalFile>
     getFiles(directoryName: string, ignorePartFiles?: boolean) : Promise<Array<string>>
     deleteFile(filePath: string): Promise<void>

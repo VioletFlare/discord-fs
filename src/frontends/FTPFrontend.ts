@@ -118,9 +118,10 @@ export default class FTPFrontend implements IFrontend{
     
     public async download(pathName:string, offset: any, cb :(err?: string,stream?: Stream ) => void){
         let file = await this.journal.getFile(pathName);
-        if(file != null){
+
+        if (file != null) {
             try{
-                let stream: Stream = await this.journal.download(file);
+                let stream: Stream = await this.journal.download(file, offset);
                 cb(null, stream);
             }catch(err){
                 cb(err);

@@ -17,6 +17,7 @@
     "multistream": "^4.1.0",
     "simple-ftpd": "git+https://github.com/VioletFlare/simple-ftpd.git",
     "stat-mode": "^1.0.0",
+    "stream-skip": "^1.0.3",
     "ts-node": "^10.9.1",
     "uuid": "^9.0.0"
   },
