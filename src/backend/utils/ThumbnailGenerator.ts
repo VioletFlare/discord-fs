@@ -1,30 +1,29 @@
 const ffmpegStatic = require('ffmpeg-static');
 const ffmpeg = require('fluent-ffmpeg');
 
-import * as path from "path";
-import * as os from "os";
+import * as stream from "stream";
 
-class ThumbnailGenerator {
+export default class ThumbnailGenerator {
 
     constructor() {
         ffmpeg.setFfmpegPath(ffmpegStatic);
     }
     
-    generateThumbnail(filePath: string) {
-        const thumbName = path.join(path.basename(filePath), '_thumb');
-        const tempDir = path.join(os.tmpdir(), "discordfs");
+    generateThumbnail(stream: stream.Stream): Promise<stream.Stream> {
+        return new Promise((resolve) => {
+            let output: stream.Stream;
 
-        ffmpeg()
-            .input(filePath)
-            .screenshots({
-                timestamps: ['50%'],
-                filename: thumbName,
-                folder: tempDir,
-                size: '320x240'
-            })
-            .on('end', function() {
-                
-            });
+            ffmpeg()
+                .input(stream)
+                .screenshots({
+                    timestamps: ['50%'],
+                    size: '320x240'
+                })
+                .output(output)
+                .on('end', () => {
+                    resolve(output);
+                })
+        });
     }
 
 }
