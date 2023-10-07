@@ -30,8 +30,9 @@ export default class HTTPFrontend implements IFrontend{
                 stream.on('close', () => {
                     setTimeout(() => {
                         res.redirect("/");
-                    },1000)
+                    }, 1000)
                 });
+                
                 file.pipe(stream);
             });
         } else {

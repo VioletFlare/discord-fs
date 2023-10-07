@@ -202,19 +202,52 @@ export default class Journal implements IJournal {
 
     public async createFile(filePath: string): Promise<stream.Writable> {
         let j = 0;
-        let that = this;
 
-        return new SizeStream(25e+6, function (stream) {
-            if (that.aesKey != null) {
+        return new SizeStream(25e+6, (stream) => {
+            if (this.aesKey != null) {
                 let iv = crypto.randomBytes(16);
-                that.createFileImpl(filePath + (j == 0 ? "" : ".part"+ j), stream.pipe(that.getCipher(iv)), iv);
+                this.createFileImpl(filePath + (j == 0 ? "" : ".part" + j), stream.pipe(this.getCipher(iv)), iv);
             } else {
-                that.createFileImpl(filePath + (j == 0 ? "" : ".part"+ j), stream);
+                this.createFileImpl(filePath + (j == 0 ? "" : ".part" + j), stream);
             }
 
             j++;
         });
     };
+
+    private async createFileOnDiscord(fileName: string, directory: DirectoryJournalEntry, content: stream.Stream, iv: Buffer) {
+        let entry: FileJournalEntry = new FileJournalEntry();
+        
+        if (iv != null) {
+            entry.iv = iv.toString("hex");
+        }
+
+        entry.directory = directory.id;
+        entry.name = fileName;
+
+        let text = JSON.stringify(entry);
+        let attachmentName = fileName;
+
+        if (this.aesKey != null) {
+            text = this.encrypt(text);
+            attachmentName = this.encrypt(attachmentName);
+        }
+
+        let a = new Discord.AttachmentBuilder(content, {name: attachmentName});
+
+        await this.channel.send({
+            content: text,
+            files: [a]
+        }).then((message: Discord.Message) => { 
+            let attachment = message.attachments.first();
+            entry.size = attachment.size;
+            entry.url = attachment.url;
+            entry.mid = message.id;
+            this.files.push(entry);
+        })
+
+        return entry;
+    }
 
     private async createFileImpl(filePath: string, content: stream.Stream, iv: Buffer = null): Promise<FileJournalEntry> {
         let that = this;
@@ -235,36 +268,8 @@ export default class Journal implements IJournal {
         if (that.files.find(f => f.directory == directory.id && f.name == fileName)) {
             await that.deleteFile(filePath);
         }
-        
-        let entry: FileJournalEntry = new FileJournalEntry();
-        
-        if (iv != null) {
-            entry.iv = iv.toString("hex");
-        }
 
-        entry.directory = directory.id;
-        entry.name = fileName;
-
-        let text = JSON.stringify(entry);
-        let attachmentName = fileName;
-
-        if (that.aesKey != null) {
-            text = that.encrypt(text);
-            attachmentName = that.encrypt(attachmentName);
-        }
-
-        let a = new Discord.AttachmentBuilder(content, {name: attachmentName});
-
-        await that.channel.send({
-            content: text,
-            files: [a]
-        }).then((message: Discord.Message) => { 
-            let attachment = message.attachments.first();
-            entry.size = attachment.size;
-            entry.url = attachment.url;
-            entry.mid = message.id;
-            that.files.push(entry);
-        })
+        const entry = this.createFileOnDiscord(fileName, directory, content, iv);
 
         return entry;
     }
@@ -280,7 +285,7 @@ export default class Journal implements IJournal {
             text = this.encrypt(text);
         }
 
-        this.channel.send(text).then((message: Discord.Message) => {
+        return this.channel.send(text).then((message: Discord.Message) => {
             entry.mid = message.id;
             this.directories.push(entry);
             return entry;
@@ -297,11 +302,7 @@ export default class Journal implements IJournal {
             return existingDirectory;
         }
     
-        this.createDirectoryOnDiscord(directoryName);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               
-        
-        const thumbsDirectoryName = this.normalizePath(path.join(directoryName, '.thumbs'))
-
-        this.createDirectoryOnDiscord(thumbsDirectoryName);
+        return this.createDirectoryOnDiscord(directoryName);
     }
 
     public async deleteDirectory(directoryName: string) {
