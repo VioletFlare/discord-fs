@@ -39,6 +39,13 @@ export default class FTPFrontend implements IFrontend{
             session.on('stat', this.stat.bind(this));
             session.on('readdir', this.readdir.bind(this));
             session.on('read', this.download.bind(this));
+
+            //when upload is initiated by the client, ftpd's STOR gets fired
+            //it calls internally emitAsync, which calls promisify passing it emit function
+            //and passing it args passed to emitAsync
+            //it returns a promise, which internally calls emit with the args and passes it a callback
+            //the call to emit fires up upload and then the callback inside upload resolves the promise passing it the stream
+            //internally the result of the promise gets assigned to the writable variable
             session.on('write', this.upload.bind(this));
         
             session.on('mkdir', this.mkdir.bind(this));
