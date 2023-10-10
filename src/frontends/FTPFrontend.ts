@@ -45,6 +45,7 @@ export default class FTPFrontend implements IFrontend{
             //and passing it args passed to emitAsync
             //it returns a promise, which internally calls emit with the args and passes it a callback
             //the call to emit fires up upload and then the callback inside upload resolves the promise passing it the stream
+            //the stream gets yielded back to the sequence function
             //internally the result of the promise gets assigned to the writable variable
             session.on('write', this.upload.bind(this));
         
