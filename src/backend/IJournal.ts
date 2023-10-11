@@ -1,6 +1,7 @@
 import * as stream from "stream";
 import { DirectoryJournalEntry } from "./DirectoryJournalEntry";
-import { JournalFile } from "./JournalFile";
+import { JournalFile } from "./JournalFile"
+import WritableStream from "./utils/WritableStream";
 
 export default interface IJournal{
     getDirectory(directoryName: string) : Promise<DirectoryJournalEntry>
@@ -11,6 +12,7 @@ export default interface IJournal{
     deleteFile(filePath: string): Promise<void>
     deleteDirectory(pathName: string) : Promise<void>
     createFile(filePath: string): Promise<stream.Writable>
+    createThumbnail(filePath: string): Promise<WritableStream>
     createDirectory(directoryName: string): Promise<DirectoryJournalEntry>
     getChildDirectories(directoryName: string) : Promise<Array<string>>
 }

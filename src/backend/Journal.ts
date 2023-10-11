@@ -7,7 +7,9 @@ import * as stream from "stream";
 import { v4 as uuidv4 } from 'uuid';
 
 import IJournal from "./IJournal";
+import WritableStream from "./utils/WritableStream";
 import SizeStream from "./utils/SizeStream";
+import ThumbnailGenerator from "./utils/ThumbnailGenerator";
 import { DirectoryJournalEntry } from "./DirectoryJournalEntry";
 import { FileJournalEntry } from "./FileJournalEntry";
 import { JournalFile } from "./JournalFile";
@@ -198,6 +200,19 @@ export default class Journal implements IJournal {
             if(message != null) promises.push(message.delete());
         }
         await Promise.all(promises);
+    }
+
+    public async createThumbnail(filePath: string): Promise <WritableStream> {
+        return new WritableStream((stream) => {
+            new ThumbnailGenerator().generateThumbnail(stream).then((s) => {
+                if (this.aesKey != null) {
+                    let iv = crypto.randomBytes(16);
+                    this.createFileImpl(filePath + '_thumb.jpg', s.pipe(this.getCipher(iv)), iv);
+                } else {
+                    this.createFileImpl(filePath + '_thumb.jpg', s);
+                }
+            });
+        })
     }
 
     public async createFile(filePath: string): Promise<stream.Writable> {

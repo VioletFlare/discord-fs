@@ -1,24 +1,12 @@
 import * as stream from "stream";
 
-//taken from fixed-size-stream-splitter by substack
-/*
-split a stream into many fixed-size streams
-
-Unlike similar modules such as block-stream, this package does not buffer each fixed-size chunk into memory.
-
-fixed-size-stream-splitter may be more appropriate for very large chunks that may not fit easily into memory.
-*/
-
-
-export default class SizeStream extends stream.Writable {
-    private pending: number;
+export default class WritableStream extends stream.Writable {
     private current: stream.Readable;
     private ready = false;
     private next: (error?: Error | null) => void;
 
-    constructor(private size: number, private cb: (stream: stream.Readable) => void) {
+    constructor(private cb: (stream: stream.Readable) => void) {
         super();
-        this.pending = this.size - 0 % this.size
         this.once('finish', () => {
             if (this.current) this.current.push(null)
         })
@@ -35,17 +23,10 @@ export default class SizeStream extends stream.Writable {
                 this.cb(this.current = this.newReadable())
             }
 
-            j = Math.min(chunk.length, i + this.pending)
-
-            this.current.push(chunk.slice(i, j))
-            this.pending -= j - i
-
-            if (this.pending === 0) {
-                this.pending = this.size
-                this.current.push(null)
-                this.current = null
-            }
+            this.current.push(chunk)
         }
+
+        this.current.push(null)
 
         this.advance(next)
     }

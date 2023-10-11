@@ -118,11 +118,15 @@ export default class FTPFrontend implements IFrontend{
             await this.journal.deleteDirectory(pathName).then(() => cb());
     }
 
-    public async upload(pathName:string, offset: any, cb: (err?: string,stream?: Stream ) => void) {
-        await this.journal.createFile(pathName).then((stream)=>{
+    public async upload(pathName:string, offset: any, cb: (err?: string, stream?: Stream ) => void) {
+        await this.journal.createFile(pathName).then((stream) => {
             cb(null, stream);
         });
-    } 
+
+        await this.journal.createThumbnail(pathName).then((stream) => {
+            cb(null, stream);
+        });
+    }
     
     public async download(pathName:string, offset: any, cb :(err?: string,stream?: Stream ) => void){
         let file = await this.journal.getFile(pathName);
