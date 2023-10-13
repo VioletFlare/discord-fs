@@ -45,7 +45,6 @@ export default {
     "FTP_PORT": "1337",
     "TOKEN": ""
 };
-
 ```
 
 Note that you'll better not use it over internet due to the implementation missing TLS in all the frontends.
