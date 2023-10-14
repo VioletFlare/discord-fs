@@ -28,5 +28,26 @@ If you haven't already created a discord bot, follow the following steps:
 You can obtain your guild and channel snowflake (its id) by enabling developer mode on your Discord client  (User Settings > Advanced > Developer Mode)
 and rightclicking both the guilds name or the specifc channel and choose "Copy ID" from the context menu.
 
+## Running
+
+To run this fork you need to have a `config.ts` file in the root directory.
+
+I've changed the config from how it was done in the original project to fit my needs.
+
+```
+export default {
+    "CHANNEL": "",
+    "GUILD": "",
+    "LISTEN_IP": "127.0.0.1",
+    "EXTERNAL_IP": "127.0.0.1",
+    "HTTP_PORT" : "1338",
+    "AES_KEY":"",
+    "FTP_PORT": "1337",
+    "TOKEN": ""
+};
+```
+
+Note that you'll better not use it over internet due to the implementation missing TLS in all the frontends.
+
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
