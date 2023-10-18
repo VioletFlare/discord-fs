@@ -1,5 +1,6 @@
 const ffmpegStatic = require('ffmpeg-static');
 const ffmpeg = require('fluent-ffmpeg');
+const fs = require('fs');
 
 import WritableStream from "./WritableStream";
 
@@ -19,24 +20,29 @@ export default class ThumbnailGenerator {
        })
       }
     
-    generateThumbnail(stream: stream.Readable): Promise<boolean> {
-        return new Promise((resolve) => {
+    generateThumbnail(s: stream.Readable): Promise<boolean> {
+        return new Promise(async (resolve) => {
             /*
-            this.getVideoMetaData(stream).then((metadata: any) => {
+            this.getVideoMetaData(s).then((metadata: any) => {
 
             })
             */
 
-            ffmpeg()
-            .input(stream)
-            .screenshots({
-                timestamps: [30],
-                size: '320x240',
-                filename: 'example.jpg'
-            })
-            .on('end', () => {
-                resolve(true);
-            })
+            await stream.pipeline(s, fs.createWriteStream('out.mkv'), () => {});
+
+            /*
+            if (s !== null) {
+                ffmpeg(s)
+                .screenshots({
+                    timestamps: [30],
+                    size: '320x240',
+                    filename: 'example.jpg'
+                })
+                .on('end', () => {
+                    resolve(true);
+                })
+            }
+            */
         });
     }
 

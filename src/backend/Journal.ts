@@ -203,9 +203,13 @@ export default class Journal implements IJournal {
     }
 
     public async createFiles(filePath: string): Promise <stream.Writable> {
-        return new WritableStream((stream) => {
-            this.createThumbnail(filePath, stream);
+        const writableStream = new WritableStream();
+
+        writableStream.current.on('data', () => {
+            this.createThumbnail(filePath, writableStream.current);
         })
+
+        return writableStream;
     }
 
     public createThumbnail(filePath: string, stream: stream.Readable): void {

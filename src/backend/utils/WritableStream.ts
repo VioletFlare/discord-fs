@@ -1,13 +1,15 @@
 import * as stream from "stream";
 
 export default class WritableStream extends stream.Writable {
-    private current: stream.Readable;
+    public current: stream.Readable;
     private next: (error?: Error | null) => void;
-    private pending: number;
     private ready = false;
 
-    constructor(private cb: (stream: stream.Readable) => void) {
+    constructor() {
         super();
+
+        this.current = this.newReadable();
+
         this.once('finish', () => {
             if (this.current) this.current.push(null)
         })
@@ -16,26 +18,16 @@ export default class WritableStream extends stream.Writable {
     _write(chunk: any, encoding: BufferEncoding, next: (error?: Error | null) => void) {
         if (chunk.length === 0) return next()
 
-        if (!this.current) {
-            this.cb(this.current = this.newReadable())
-        }
-
         this.current.push(chunk)
-        
-        this.current.push(null)
-
-        this.current = null
 
         this.advance(next)
     }
 
     advance(next: (error?: Error | null) => void) {
-        if (this.current === null) {
-            next()
-        }
-        else if (this.ready) {
+        next()
+
+        if (this.ready) {
             this.ready = false
-            next()
         }
         else this.next = next
     }
