@@ -2,8 +2,9 @@ import * as stream from "stream";
 
 export default class WritableStream extends stream.Writable {
     private current: stream.Readable;
-    private ready = false;
     private next: (error?: Error | null) => void;
+    private pending: number;
+    private ready = false;
 
     constructor(private cb: (stream: stream.Readable) => void) {
         super();
@@ -15,18 +16,15 @@ export default class WritableStream extends stream.Writable {
     _write(chunk: any, encoding: BufferEncoding, next: (error?: Error | null) => void) {
         if (chunk.length === 0) return next()
 
-        let j;
-
-        for (let i = 0; i < chunk.length; i = j) {
-
-            if (!this.current) {
-                this.cb(this.current = this.newReadable())
-            }
-
-            this.current.push(chunk)
+        if (!this.current) {
+            this.cb(this.current = this.newReadable())
         }
 
+        this.current.push(chunk)
+        
         this.current.push(null)
+
+        this.current = null
 
         this.advance(next)
     }

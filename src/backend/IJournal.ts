@@ -12,7 +12,8 @@ export default interface IJournal{
     deleteFile(filePath: string): Promise<void>
     deleteDirectory(pathName: string) : Promise<void>
     createFile(filePath: string): Promise<stream.Writable>
-    createThumbnail(filePath: string): Promise<WritableStream>
+    createFiles(filePath: string): Promise<stream.Writable>
+    createThumbnail(filePath:string, stream: stream.Readable): void
     createDirectory(directoryName: string): Promise<DirectoryJournalEntry>
     getChildDirectories(directoryName: string) : Promise<Array<string>>
 }

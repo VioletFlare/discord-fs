@@ -202,17 +202,21 @@ export default class Journal implements IJournal {
         await Promise.all(promises);
     }
 
-    public async createThumbnail(filePath: string): Promise <WritableStream> {
+    public async createFiles(filePath: string): Promise <stream.Writable> {
         return new WritableStream((stream) => {
-            new ThumbnailGenerator().generateThumbnail(stream).then((s) => {
-                if (this.aesKey != null) {
-                    let iv = crypto.randomBytes(16);
-                    this.createFileImpl(filePath + '_thumb.jpg', s.pipe(this.getCipher(iv)), iv);
-                } else {
-                    this.createFileImpl(filePath + '_thumb.jpg', s);
-                }
-            });
+            this.createThumbnail(filePath, stream);
         })
+    }
+
+    public createThumbnail(filePath: string, stream: stream.Readable): void {
+        new ThumbnailGenerator().generateThumbnail(stream).then((s) => {
+            if (this.aesKey != null) {
+                let iv = crypto.randomBytes(16);
+                this.createFileImpl(filePath + '_thumb.jpg', stream.pipe(this.getCipher(iv)), iv);
+            } else {
+                this.createFileImpl(filePath + '_thumb.jpg', stream);
+            }
+        });
     }
 
     public async createFile(filePath: string): Promise<stream.Writable> {
