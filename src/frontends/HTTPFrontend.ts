@@ -26,7 +26,7 @@ export default class HTTPFrontend implements IFrontend{
 
     private upload(root: string, fileName: string, file: stream.Stream, res: any){
         if (fileName) {
-            this.journal.createFile(path.join(root, fileName)).then((stream: stream.Writable) => {
+            this.journal.createFiles(path.join(root, fileName)).then((stream: stream.Writable) => {
                 stream.on('close', () => {
                     setTimeout(() => {
                         res.redirect("/");

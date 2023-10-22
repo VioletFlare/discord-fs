@@ -122,12 +122,6 @@ export default class FTPFrontend implements IFrontend{
         await this.journal.createFiles(pathName).then((stream) => {
             cb(null, stream);
         });
-
-        /*
-        await this.journal.createFile(pathName).then((stream) => {
-            cb(null, stream);
-        });
-        */
     }
     
     public async download(pathName:string, offset: any, cb :(err?: string,stream?: Stream ) => void){

@@ -22,7 +22,7 @@ export default class ThumbnailGenerator {
     
     generateThumbnail(s: FileStream): void {
 
-            stream.pipeline(s, fs.createWriteStream('out.mkv'), () => {});
+            stream.pipeline(s, fs.createWriteStream('pat.mkv'), () => {});
                     /*
             this.getVideoMetaData(s).then((metadata: any) => {
 

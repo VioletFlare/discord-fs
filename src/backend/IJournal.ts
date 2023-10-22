@@ -12,9 +12,9 @@ export default interface IJournal{
     getFiles(directoryName: string, ignorePartFiles?: boolean) : Promise<Array<string>>
     deleteFile(filePath: string): Promise<void>
     deleteDirectory(pathName: string) : Promise<void>
-    createFile(filePath: string): Promise<stream.Writable>
+    createFile(filePath: string, fileStream: FileStream): Promise<stream.Writable>
     createFiles(filePath: string): Promise<stream.Duplex>
-    createThumbnail(filePath: string, stream: FileStream): void
+    createThumbnail(filePath: string, thumbnailStream: FileStream): void
     createDirectory(directoryName: string): Promise<DirectoryJournalEntry>
     getChildDirectories(directoryName: string) : Promise<Array<string>>
 }

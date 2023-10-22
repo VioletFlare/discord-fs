@@ -15,7 +15,7 @@ import { FileJournalEntry } from "./FileJournalEntry";
 import { JournalFile } from "./JournalFile";
 import { JOURNAL_ENTRY_TYPE } from "./BaseJournalEntry";
 
-const fs = require('fs');
+const pump = require('pump');
 
 import config from "../../config";
 
@@ -207,13 +207,19 @@ export default class Journal implements IJournal {
     public async createFiles(filePath: string): Promise <stream.Duplex> {
         const fileStream = new FileStream({});
 
-        fileStream.on('readytoread', () => this.createThumbnail(filePath, fileStream))
+        fileStream.on('readytoread', (fStream) =>  {
+            const thumbnailStream = fStream.pipe(new stream.PassThrough);
+            const fileStream = fStream.pipe(new stream.PassThrough);
+
+            this.createThumbnail(filePath, thumbnailStream)
+            this.createFile(filePath, fileStream);
+        })
 
         return fileStream;
     }
 
-    public createThumbnail(filePath: string, stream: FileStream): void {
-        new ThumbnailGenerator().generateThumbnail(stream);
+    public createThumbnail(filePath: string, thumbnailStream: FileStream): void {
+        new ThumbnailGenerator().generateThumbnail(thumbnailStream);
         /*.then((s) => {
             if (this.aesKey != null) {
                 let iv = crypto.randomBytes(16);
@@ -225,19 +231,22 @@ export default class Journal implements IJournal {
         */
     }
 
-    public async createFile(filePath: string): Promise<stream.Writable> {
+    public async createFile(filePath: string, fileStream: FileStream): Promise<stream.Writable> {
         let j = 0;
 
-        return new SizeStream(25e+6, (stream) => {
-            if (this.aesKey != null) {
-                let iv = crypto.randomBytes(16);
-                this.createFileImpl(filePath + (j == 0 ? "" : ".part" + j), stream.pipe(this.getCipher(iv)), iv);
-            } else {
-                this.createFileImpl(filePath + (j == 0 ? "" : ".part" + j), stream);
-            }
-
-            j++;
-        });
+        return pump(
+            fileStream,
+            new SizeStream(25e+6, (stream) => {
+                if (this.aesKey != null) {
+                    let iv = crypto.randomBytes(16);
+                    this.createFileImpl(filePath + (j == 0 ? "" : ".part" + j), stream.pipe(this.getCipher(iv)), iv);
+                } else {
+                    this.createFileImpl(filePath + (j == 0 ? "" : ".part" + j), stream);
+                }
+    
+                j++;
+            })
+        ) 
     };
 
     private async createFileOnDiscord(fileName: string, directory: DirectoryJournalEntry, content: stream.Stream, iv: Buffer) {
