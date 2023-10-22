@@ -205,7 +205,7 @@ export default class Journal implements IJournal {
     }
 
     public async createFiles(filePath: string): Promise <stream.Duplex> {
-        const fileStream = new FileStream({ highWaterMark: 65536 });
+        const fileStream = new FileStream({});
 
         fileStream.on('readytoread', () => this.createThumbnail(filePath, fileStream))
 
