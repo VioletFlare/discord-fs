@@ -7,13 +7,15 @@ import * as stream from "stream";
 import { v4 as uuidv4 } from 'uuid';
 
 import IJournal from "./IJournal";
-import WritableStream from "./utils/WritableStream";
+import FileStream from "./utils/FileStream";
 import SizeStream from "./utils/SizeStream";
 import ThumbnailGenerator from "./utils/ThumbnailGenerator";
 import { DirectoryJournalEntry } from "./DirectoryJournalEntry";
 import { FileJournalEntry } from "./FileJournalEntry";
 import { JournalFile } from "./JournalFile";
 import { JOURNAL_ENTRY_TYPE } from "./BaseJournalEntry";
+
+const fs = require('fs');
 
 import config from "../../config";
 
@@ -202,18 +204,17 @@ export default class Journal implements IJournal {
         await Promise.all(promises);
     }
 
-    public async createFiles(filePath: string): Promise <stream.Writable> {
-        const writableStream = new WritableStream();
+    public async createFiles(filePath: string): Promise <stream.Duplex> {
+        const fileStream = new FileStream({ highWaterMark: 65536 });
 
-        writableStream.current.on('data', () => {
-            this.createThumbnail(filePath, writableStream.current);
-        })
+        fileStream.on('readytoread', () => this.createThumbnail(filePath, fileStream))
 
-        return writableStream;
+        return fileStream;
     }
 
-    public createThumbnail(filePath: string, stream: stream.Readable): void {
-        new ThumbnailGenerator().generateThumbnail(stream).then((s) => {
+    public createThumbnail(filePath: string, stream: FileStream): void {
+        new ThumbnailGenerator().generateThumbnail(stream);
+        /*.then((s) => {
             if (this.aesKey != null) {
                 let iv = crypto.randomBytes(16);
                 this.createFileImpl(filePath + '_thumb.jpg', stream.pipe(this.getCipher(iv)), iv);
@@ -221,6 +222,7 @@ export default class Journal implements IJournal {
                 this.createFileImpl(filePath + '_thumb.jpg', stream);
             }
         });
+        */
     }
 
     public async createFile(filePath: string): Promise<stream.Writable> {

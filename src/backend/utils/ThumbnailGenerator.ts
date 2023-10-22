@@ -2,7 +2,7 @@ const ffmpegStatic = require('ffmpeg-static');
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 
-import WritableStream from "./WritableStream";
+import FileStream from "./FileStream";
 
 import * as stream from "stream";
 
@@ -20,15 +20,14 @@ export default class ThumbnailGenerator {
        })
       }
     
-    generateThumbnail(s: stream.Readable): Promise<boolean> {
-        return new Promise(async (resolve) => {
-            /*
+    generateThumbnail(s: FileStream): void {
+
+            stream.pipeline(s, fs.createWriteStream('out.mkv'), () => {});
+                    /*
             this.getVideoMetaData(s).then((metadata: any) => {
 
             })
             */
-
-            await stream.pipeline(s, fs.createWriteStream('out.mkv'), () => {});
 
             /*
             if (s !== null) {
@@ -43,7 +42,8 @@ export default class ThumbnailGenerator {
                 })
             }
             */
-        });
+
+        
     }
 
 }
