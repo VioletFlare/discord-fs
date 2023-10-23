@@ -207,19 +207,19 @@ export default class Journal implements IJournal {
     public async createFiles(filePath: string): Promise <stream.Duplex> {
         const fileStream = new FileStream({});
 
-        fileStream.on('readytoread', (fStream) =>  {
-            const thumbnailStream = fStream.pipe(new stream.PassThrough);
-            const fileStream = fStream.pipe(new stream.PassThrough);
+        fileStream.on('readytoread', async (fStream) =>  {
+            //const thumbnailStream = fStream.pipe(new stream.PassThrough);
+            //const fs = fStream.pipe(new stream.PassThrough);
 
-            this.createThumbnail(filePath, thumbnailStream)
-            this.createFile(filePath, fileStream);
+            await this.createThumbnail(filePath, fStream)
+            await this.createFile(filePath, fStream);
         })
 
         return fileStream;
     }
 
-    public createThumbnail(filePath: string, thumbnailStream: FileStream): void {
-        new ThumbnailGenerator().generateThumbnail(thumbnailStream);
+    public async createThumbnail(filePath: string, thumbnailStream: FileStream): Promise<void> {
+        await new ThumbnailGenerator().generateThumbnail(thumbnailStream);
         /*.then((s) => {
             if (this.aesKey != null) {
                 let iv = crypto.randomBytes(16);

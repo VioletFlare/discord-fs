@@ -20,9 +20,9 @@ export default class ThumbnailGenerator {
        })
       }
     
-    generateThumbnail(s: FileStream): void {
+    async generateThumbnail(s: FileStream): Promise<void> {
 
-            stream.pipeline(s, fs.createWriteStream('pat.mkv'), () => {});
+            await stream.pipeline(s, fs.createWriteStream('pat.mkv'), () => {});
                     /*
             this.getVideoMetaData(s).then((metadata: any) => {
 
